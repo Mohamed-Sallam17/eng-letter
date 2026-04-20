@@ -122,8 +122,10 @@
 
 .letter-page {
   position: relative;
-  width: 210mm;
+  width: 100%;
+  max-width: 210mm;
   min-height: 297mm;
+  aspect-ratio: 210 / 297;
   background:
     linear-gradient(180deg, rgba(180, 136, 70, 0.1), transparent 22%),
     linear-gradient(180deg, transparent, rgba(40, 28, 15, 0.04)),
@@ -131,7 +133,7 @@
   box-shadow:
     0 30px 60px rgba(57, 44, 21, 0.14),
     inset 0 0 0 1px rgba(84, 65, 36, 0.08);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .letter-page::before {
@@ -155,9 +157,9 @@
 
 .letter-brand {
   position: absolute;
-  top: 14mm;
-  right: 22mm;
-  left: 22mm;
+  top: 4.72%;
+  right: 10.48%;
+  left: 10.48%;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -166,21 +168,21 @@
 .letter-badge {
   display: grid;
   place-items: center;
-  width: 22mm;
-  height: 22mm;
+  width: clamp(3rem, 10vw, 5.2rem);
+  height: clamp(3rem, 10vw, 5.2rem);
   border-radius: 9999px;
   border: 1px solid rgba(180, 136, 70, 0.35);
   background: rgba(255, 251, 235, 0.95);
   color: #92400e;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 800;
 }
 
 .letter-guides {
   position: absolute;
-  top: 31mm;
-  right: 22mm;
-  left: 22mm;
+  top: 10.44%;
+  right: 10.48%;
+  left: 10.48%;
   display: grid;
   gap: 5px;
 }
@@ -198,16 +200,16 @@
 
 .letter-footer {
   position: absolute;
-  right: 22mm;
-  bottom: 14mm;
-  left: 22mm;
+  right: 10.48%;
+  bottom: 4.72%;
+  left: 10.48%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid rgba(120, 96, 55, 0.18);
-  padding-top: 5mm;
+  padding-top: 1.25rem;
   color: #57534e;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 @media (max-width: 1280px) {
@@ -218,7 +220,7 @@
 
 @media (max-width: 900px) {
   .letter-page {
-    width: min(210mm, 100%);
+    min-height: auto;
   }
 
   .letter-footer {
@@ -232,4 +234,14 @@
     min-height: auto;
     padding-bottom: 1rem;
   }
+
+  .letter-page::before {
+    inset: 5.72%;
+  }
+
+  .letter-page::after {
+    width: 34.29%;
+    height: 24.24%;
+  }
 }
+
