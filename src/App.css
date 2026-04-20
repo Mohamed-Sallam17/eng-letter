@@ -1,0 +1,235 @@
+.field-shell {
+  display: block;
+  border: 1px solid rgb(231 229 228);
+  border-radius: 1.5rem;
+  background: rgba(250, 250, 249, 0.78);
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.field-shell:focus-within {
+  border-color: rgb(251 191 36);
+  background: rgb(255 255 255);
+  box-shadow: 0 16px 35px rgba(180, 120, 34, 0.12);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: rgb(68 64 60);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.field-input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgb(231 229 228);
+  border-radius: 1rem;
+  background: rgb(255 255 255);
+  padding: 0.875rem 1rem;
+  color: rgb(28 25 23);
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: right;
+  outline: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.field-input::placeholder {
+  color: rgb(168 162 158);
+}
+
+.field-input:focus {
+  border-color: rgb(245 158 11);
+  box-shadow: 0 0 0 4px rgba(254, 243, 199, 0.9);
+}
+
+.action-button {
+  border: 0;
+  border-radius: 1.25rem;
+  min-height: 48px;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease,
+    background-color 180ms ease;
+}
+
+.action-button:hover {
+  transform: translateY(-1px);
+}
+
+.action-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.action-button-primary {
+  background: rgb(28 25 23);
+  color: white;
+  box-shadow: 0 18px 35px rgba(28, 25, 23, 0.24);
+}
+
+.action-button-primary:hover {
+  background: rgb(41 37 36);
+}
+
+.action-button-secondary {
+  border: 1px solid rgb(252 211 77);
+  background: rgb(255 251 235);
+  color: rgb(120 53 15);
+}
+
+.action-button-secondary:hover {
+  background: rgb(254 243 199);
+}
+
+.mobile-tab {
+  min-height: 48px;
+  border: 0;
+  border-radius: 1rem;
+  background: transparent;
+  color: rgb(87 83 78);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.mobile-tab-active {
+  background: rgb(28 25 23);
+  color: white;
+  box-shadow: 0 12px 24px rgba(28, 25, 23, 0.18);
+}
+
+.preview-frame {
+  min-height: calc(100vh - 3rem);
+}
+
+.letter-page {
+  position: relative;
+  width: 210mm;
+  min-height: 297mm;
+  background:
+    linear-gradient(180deg, rgba(180, 136, 70, 0.1), transparent 22%),
+    linear-gradient(180deg, transparent, rgba(40, 28, 15, 0.04)),
+    #f8f5ef;
+  box-shadow:
+    0 30px 60px rgba(57, 44, 21, 0.14),
+    inset 0 0 0 1px rgba(84, 65, 36, 0.08);
+  overflow: hidden;
+}
+
+.letter-page::before {
+  content: '';
+  position: absolute;
+  inset: 12mm;
+  border: 1px solid rgba(120, 96, 55, 0.16);
+  pointer-events: none;
+}
+
+.letter-page::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 72mm;
+  height: 72mm;
+  background: radial-gradient(circle at top right, rgba(180, 136, 70, 0.28), transparent 64%);
+  pointer-events: none;
+}
+
+.letter-brand {
+  position: absolute;
+  top: 14mm;
+  right: 22mm;
+  left: 22mm;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.letter-badge {
+  display: grid;
+  place-items: center;
+  width: 22mm;
+  height: 22mm;
+  border-radius: 9999px;
+  border: 1px solid rgba(180, 136, 70, 0.35);
+  background: rgba(255, 251, 235, 0.95);
+  color: #92400e;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.letter-guides {
+  position: absolute;
+  top: 31mm;
+  right: 22mm;
+  left: 22mm;
+  display: grid;
+  gap: 5px;
+}
+
+.letter-guides span {
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(146, 64, 14, 0.34), transparent);
+}
+
+.letter-absolute {
+  position: absolute;
+  z-index: 2;
+}
+
+.letter-footer {
+  position: absolute;
+  right: 22mm;
+  bottom: 14mm;
+  left: 22mm;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(120, 96, 55, 0.18);
+  padding-top: 5mm;
+  color: #57534e;
+  font-size: 13px;
+}
+
+@media (max-width: 1280px) {
+  .preview-frame {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .letter-page {
+    width: min(210mm, 100%);
+  }
+
+  .letter-footer {
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 767px) {
+  .preview-frame {
+    min-height: auto;
+    padding-bottom: 1rem;
+  }
+}
