@@ -58,6 +58,17 @@ function App() {
   const [mobileView, setMobileView] = useState('form')
   const [previewScale, setPreviewScale] = useState(1)
   const [previewHeight, setPreviewHeight] = useState('297mm')
+  const formData = letter
+  const isPreviewVisibleOnMobile = mobileView === 'preview'
+
+  const waitForPreviewPaint = async (delay = 0) => {
+    if (delay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delay))
+    }
+
+    await new Promise((resolve) => requestAnimationFrame(() => resolve()))
+    await new Promise((resolve) => requestAnimationFrame(() => resolve()))
+  }
 
   useEffect(() => {
     const storedLetters = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
@@ -130,7 +141,7 @@ function App() {
       ...letter,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
-      previewLetterNumber: formatLetterNumber(letter.letterNumber),
+      previewLetterNumber: formatLetterNumber(formData.letterNumber),
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...storedLetters, payload]))
@@ -143,18 +154,23 @@ function App() {
 
     try {
       setIsExporting(true)
+      const isMobileDevice = window.innerWidth < 768
 
-      if (window.innerWidth < 768 && mobileView !== 'preview') {
+      if (isMobileDevice && mobileView !== 'preview') {
         setMobileView('preview')
-        await new Promise((resolve) => setTimeout(resolve, 300))
+        await waitForPreviewPaint(600)
       }
 
       if (document.fonts?.ready) {
         await document.fonts.ready
       }
 
+      if (isMobileDevice) {
+        await waitForPreviewPaint()
+      }
+
       const canvas = await html2canvas(previewRef.current, {
-        scale: 2,
+        scale: isMobileDevice ? 1.5 : 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#f8f5ef',
@@ -163,18 +179,38 @@ function App() {
           if (el) {
             el.style.color = '#000000'
             el.style.backgroundColor = '#f8f5ef'
+            el.style.borderColor = '#e5e7eb'
+
+            const clonedNodes = el.querySelectorAll('*')
+            clonedNodes.forEach((node) => {
+              const currentNode = node
+              currentNode.style.color = '#000000'
+              currentNode.style.borderColor = '#e5e7eb'
+
+              const computedStyle = clonedDoc.defaultView?.getComputedStyle(currentNode)
+              const computedBackgroundImage = computedStyle?.backgroundImage || ''
+              const computedBackgroundColor = computedStyle?.backgroundColor || ''
+
+              if (computedBackgroundImage.includes('oklch')) {
+                currentNode.style.backgroundImage = 'none'
+              }
+
+              if (computedBackgroundColor.includes('oklch')) {
+                currentNode.style.backgroundColor = 'transparent'
+              }
+            })
           }
         },
       })
 
-      const imageData = canvas.toDataURL('image/png')
+      const imageData = canvas.toDataURL('image/jpeg', 0.9)
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       })
 
-      pdf.addImage(imageData, 'PNG', 0, 0, 210, 297)
+      pdf.addImage(imageData, 'JPEG', 0, 0, 210, 297)
 
       const fileName = `${sanitizeFileName(letter.subject)}-${letter.date}-${sanitizeFileName(
         letter.letterNumber,
@@ -198,9 +234,7 @@ function App() {
           window.open(objectUrl, '_blank', 'noopener,noreferrer')
         }
 
-        window.setTimeout(() => {
-          URL.revokeObjectURL(objectUrl)
-        }, 1000)
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
 
         console.error('PDF Save Fallback:', saveError)
       }
@@ -238,7 +272,7 @@ function App() {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row">
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row">
         <section
           className={`${mobileView === 'preview' ? 'hidden md:block' : 'block'} w-full rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-[0_24px_80px_rgba(109,82,43,0.14)] backdrop-blur md:p-6 lg:w-2/5`}
         >
@@ -255,7 +289,7 @@ function App() {
             <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-center">
               <p className="text-xs text-stone-500">رقم العرض</p>
               <p className="mt-1 text-lg font-extrabold text-amber-700">
-                {formatLetterNumber(letter.letterNumber)}
+                {formatLetterNumber(formData.letterNumber)}
               </p>
             </div>
           </div>
@@ -266,7 +300,7 @@ function App() {
               <input
                 className="field-input"
                 type="date"
-                value={letter.date}
+                value={formData.date}
                 onChange={handleChange('date')}
               />
             </label>
@@ -277,7 +311,7 @@ function App() {
                 className="field-input"
                 type="number"
                 min="1"
-                value={letter.letterNumber}
+                value={formData.letterNumber}
                 onChange={handleChange('letterNumber')}
                 placeholder="مثال: 125"
               />
@@ -287,7 +321,7 @@ function App() {
               <span className="field-label">الجهة المرسل إليها</span>
               <textarea
                 className="field-input min-h-28 resize-none"
-                value={letter.recipient}
+                value={formData.recipient}
                 onChange={handleChange('recipient')}
                 placeholder="اكتب اسم الجهة"
               />
@@ -298,7 +332,7 @@ function App() {
               <input
                 className="field-input"
                 type="text"
-                value={letter.subject}
+                value={formData.subject}
                 onChange={handleChange('subject')}
                 placeholder="عنوان الموضوع"
               />
@@ -308,7 +342,7 @@ function App() {
               <span className="field-label">اسم المشروع</span>
               <textarea
                 className="field-input min-h-36 resize-none"
-                value={letter.projectName}
+                value={formData.projectName}
                 onChange={handleChange('projectName')}
                 placeholder="الوصف الكامل للمشروع"
               />
@@ -318,7 +352,7 @@ function App() {
               <span className="field-label">نوع الحفظ</span>
               <select
                 className="field-input"
-                value={letter.status}
+                value={formData.status}
                 onChange={handleChange('status')}
               >
                 <option value="publish">نهائي</option>
@@ -329,7 +363,7 @@ function App() {
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <button type="button" className="action-button action-button-primary" onClick={handleSave}>
-              حفظ {letter.status === 'publish' ? 'نهائي' : 'كمسودة'}
+              حفظ {formData.status === 'publish' ? 'نهائي' : 'كمسودة'}
             </button>
             <button
               type="button"
@@ -348,12 +382,20 @@ function App() {
         </section>
 
         <section
-          className={`${mobileView === 'form' ? 'hidden md:block' : 'block'} w-full rounded-[2rem] border border-stone-200/80 bg-stone-950/5 p-3 shadow-[0_30px_90px_rgba(56,41,18,0.12)] lg:w-3/5`}
+          className={`w-full rounded-[2rem] border border-stone-200/80 bg-stone-950/5 p-3 shadow-[0_30px_90px_rgba(56,41,18,0.12)] transition-opacity duration-200 lg:w-3/5 ${
+            isPreviewVisibleOnMobile
+              ? 'relative z-10 visible opacity-100 md:block'
+              : 'pointer-events-none invisible absolute inset-x-0 top-0 opacity-0 md:pointer-events-auto md:visible md:relative md:z-auto md:opacity-100'
+          }`}
         >
           <div
             ref={previewShellRef}
-            className="preview-frame overflow-x-hidden overflow-y-auto rounded-[1.5rem] bg-gradient-to-br from-stone-200 via-stone-100 to-stone-200 p-3 md:p-5"
-            style={{ minHeight: previewHeight }}
+            className="preview-frame min-h-[500px] h-fit overflow-x-hidden overflow-y-auto rounded-[1.5rem] bg-gradient-to-br from-stone-200 via-stone-100 to-stone-200 p-3 pb-24 md:p-5"
+            style={{
+              minHeight: previewHeight,
+              backgroundColor: '#f8f5ef',
+              color: '#000000',
+            }}
           >
             <div
               className="mx-auto w-fit"
@@ -362,7 +404,16 @@ function App() {
                 transformOrigin: 'top center',
               }}
             >
-              <div ref={previewRef} data-preview-container className="letter-page mx-auto">
+              <div
+                ref={previewRef}
+                data-preview-container
+                className="letter-page mx-auto"
+                style={{
+                  backgroundColor: '#f8f5ef',
+                  color: '#000000',
+                  minHeight: '297mm',
+                }}
+              >
               <div className="letter-brand">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.45em] text-amber-700">
@@ -385,18 +436,18 @@ function App() {
               </div>
 
               <p className="letter-absolute text-[20px] font-bold" style={{ top: '38mm', right: '22mm' }}>
-                التاريخ: {toArabicDate(letter.date)}
+                التاريخ: {toArabicDate(formData.date)}
               </p>
 
               <p className="letter-absolute text-[20px] font-bold" style={{ top: '48mm', right: '22mm' }}>
-                رقم الخطاب: {formatLetterNumber(letter.letterNumber)}
+                رقم الخطاب: {formatLetterNumber(formData.letterNumber)}
               </p>
 
               <p
                 className="letter-absolute max-w-[140mm] text-[21px] font-semibold leading-[1.9]"
                 style={{ top: '71mm', right: '22mm' }}
               >
-                السادة / {letter.recipient}
+                السادة / {formData.recipient}
               </p>
 
               <div
@@ -404,7 +455,7 @@ function App() {
                 style={{ top: '98mm', right: '22mm' }}
               >
                 <span className="text-[20px] font-bold">الموضوع:</span>
-                <span className="text-[20px] font-extrabold text-amber-800">{letter.subject}</span>
+                <span className="text-[20px] font-extrabold text-amber-800">{formData.subject}</span>
               </div>
 
               <div
@@ -419,7 +470,7 @@ function App() {
                   وإنجازها وفق نطاق العقد والاشتراطات المعتمدة.
                 </p>
                 <p className="rounded-[18px] bg-amber-50 px-5 py-4 font-semibold text-stone-900">
-                  {letter.projectName}
+                  {formData.projectName}
                 </p>
                 <p className="mt-5">
                   وعليه نأمل من سعادتكم التكرم بإصدار شهادة إنجاز للمشروع أعلاه، شاكرين لكم حسن
@@ -467,3 +518,4 @@ function App() {
 }
 
 export default App
+
